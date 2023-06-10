@@ -42,7 +42,7 @@ export const HystoryList = styled.div`
     }
 
     td {
-      background-color: ${({ theme }) => theme['gray-700']};
+      background: ${({ theme }) => theme['gray-700']};
       border-top: 4px solid ${({ theme }) => theme['gray-800']};
       padding: 1rem;
       font-size: 0.875rem;
@@ -57,5 +57,30 @@ export const HystoryList = styled.div`
         padding-right: 1.5rem;
       }
     }
+  }
+`
+
+const STATUS_COLORS = {
+  yellow: 'yellow-500',
+  green: 'green-500',
+  red: 'red-500',
+} as const
+
+interface StatusProps {
+  statusColor: keyof typeof STATUS_COLORS
+}
+
+export const Status = styled.span<StatusProps>`
+  gap: 0.5rem;
+  display: flex;
+  align-items: center;
+
+  &::before {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    background-color: ${(props) =>
+      props.theme[STATUS_COLORS[props.statusColor]]};
   }
 `
