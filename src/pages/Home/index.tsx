@@ -12,6 +12,7 @@ import {
   StartCountdownButton,
   TaskInput,
 } from './styles'
+import { useState } from 'react'
 
 const newYcleFormValidationSchema = zod.object({
   task: zod.string().min(1, 'Informe a tarefa'),
@@ -21,15 +22,40 @@ const newYcleFormValidationSchema = zod.object({
     .max(60, 'O ciclo deve ser de no máximo 60 minutos'),
 })
 
+type NewCyleFormData = zod.infer<typeof newYcleFormValidationSchema>
+
+interface Cycle {
+  id: string
+  task: string
+  minutesAmount: number
+}
+
 export const Home = () => {
-  const { register, handleSubmit, watch } = useForm({
+  const [cycles, setCycles] = useState<Cycle[]>([])
+  const [activeCycleId, setActiveCycleId] = useState<string | null>(null)
+
+  const { register, handleSubmit, watch, reset } = useForm<NewCyleFormData>({
     // formState
     resolver: zodResolver(newYcleFormValidationSchema),
+    defaultValues: {
+      task: '',
+      minutesAmount: 0,
+    },
   })
 
-  function handleCreateNewCycle(data: any) {
-    console.log(data)
+  function handleCreateNewCycle(data: NewCyleFormData) {
+    const id = String(new Date().getTime())
+    const newCycle: Cycle = {
+      id,
+      task: data.task,
+      minutesAmount: data.minutesAmount,
+    }
+    setCycles((state) => [...state, newCycle])
+    setActiveCycleId(id)
+    reset()
   }
+
+  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
 
   const task = watch('task')
   const minutesAmount = watch('minutesAmount')
