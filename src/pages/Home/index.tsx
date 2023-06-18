@@ -7,7 +7,7 @@ import {
   StartCountdownButton,
   StopCountdownButton,
 } from './styles'
-import { useEffect, useState } from 'react'
+import { createContext, useEffect, useState } from 'react'
 import { differenceInSeconds } from 'date-fns'
 import { NewCycleForm } from './components/NewCycleForm'
 import { Countdown } from './components/Countdown'
@@ -20,6 +20,14 @@ interface Cycle {
   interruptedDate?: Date
   fineshedDate?: Date
 }
+
+interface CyclesContextType {
+  activeCycle: Cycle | undefined
+  activeCycleId: string | null
+  handleFineshedCycle: () => void
+}
+
+export const CyclesContext = createContext({} as CyclesContextType)
 
 export const Home = () => {
   const [cycles, setCycles] = useState<Cycle[]>([])
@@ -54,28 +62,30 @@ export const Home = () => {
     setActiveCycleId(null)
   }
 
-  const currentSecunds = activeCycle ? totalSecunds - amountSecundsPassed : 0
-
-  const minutesAmount = Math.floor(currentSecunds / 60)
-  const secundsAmout = currentSecunds % 60
-
-  const minutes = String(minutesAmount).padStart(2, '0')
-  const seconds = String(secundsAmout).padStart(2, '0')
+  function handleFineshedCycle() {
+    setCycles((state) =>
+      state.map((cycle) => {
+        if (cycle.id === activeCycleId) {
+          return { ...cycle, fineshedDate: new Date() }
+        } else {
+          return cycle
+        }
+      }),
+    )
+  }
 
   const task = watch('task')
   const isSubmitDisabled = !task
 
-  useEffect(() => {
-    if (activeCycle) {
-      document.title = `${minutes}:${seconds}`
-    }
-  }, [minutes, seconds, activeCycle])
-
   return (
     <HomeContainer>
       <form onSubmit={handleSubmit(handleCreateNewCycle)} action="">
-        <NewCycleForm />
-        <Countdown />
+        <CyclesContext.Provider
+          value={{ activeCycle, activeCycleId, handleFineshedCycle }}
+        >
+          <NewCycleForm />
+          <Countdown />
+        </CyclesContext.Provider>
         {activeCycle ? (
           <StopCountdownButton onClick={handleInterruptedCycle} type="button">
             <Stop size={24} />
