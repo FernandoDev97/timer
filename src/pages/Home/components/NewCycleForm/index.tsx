@@ -1,27 +1,12 @@
-import { useForm } from 'react-hook-form'
+import { useFormContext } from 'react-hook-form'
 import { FormContainer, MinutesAmountInput, TaskInput } from './styles'
-import * as zod from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-
-const newYcleFormValidationSchema = zod.object({
-  task: zod.string().min(1, 'Informe a tarefa'),
-  minutesAmount: zod
-    .number()
-    .min(5, 'O ciclo precisa ser de no mínimo 5 minutos')
-    .max(60, 'O ciclo deve ser de no máximo 60 minutos'),
-})
-
-type NewCyleFormData = zod.infer<typeof newYcleFormValidationSchema>
+import { useContext } from 'react'
+import { CyclesContext } from '../..'
 
 export const NewCycleForm = () => {
-  const { register, handleSubmit, watch, reset } = useForm<NewCyleFormData>({
-    // formState
-    resolver: zodResolver(newYcleFormValidationSchema),
-    defaultValues: {
-      task: '',
-      minutesAmount: 0,
-    },
-  })
+  const { activeCycle } = useContext(CyclesContext)
+  const { register } = useFormContext()
+
   return (
     <FormContainer>
       <label htmlFor="task">Vou trabalhar em</label>
